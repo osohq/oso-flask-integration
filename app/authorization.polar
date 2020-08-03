@@ -19,14 +19,15 @@ allow_by_path(_user, "PUT", "expenses", ["submit"]);
 
 # by model
 allow(user: User, "read", expense: Expense) if
-    debug(expense) and
     submitted(user, expense);
 
 allow(user: User, "read", expense: SAExpense) if
-    debug(expense) and
     submitted(user, expense);
 
 submitted(user: User, expense: Expense) if
+    user.id = expense.user_id;
+
+submitted(user: User, expense: SAExpense) if
     user.id = expense.user_id;
 
 ### Organization rules
