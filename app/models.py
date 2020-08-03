@@ -46,3 +46,28 @@ class Organization(db.Model):
     @classmethod
     def from_json(self, data):
         return self(**data)
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(256))
+    title = db.Column(db.String(256))
+
+    location_id = db.Column(db.Integer)
+    organization_id = db.Column(db.Integer)
+    manager_id = db.Column(db.Integer)
+
+    def json(self):
+        return json.dumps({
+            'id': self.id,
+            'email': self.email,
+            'title': self.title,
+            'location_id': self.location_id,
+            'organization_id': self.organization_id,
+            'manager_id': self.manager_id
+        })
+
+    @classmethod
+    def from_json(self, data):
+        return self(**data)
