@@ -30,3 +30,19 @@ class Expense(db.Model):
     @classmethod
     def from_json(self, data):
         return self(**data)
+
+class Organization(db.Model):
+    __tablename__ = 'organizations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128))
+
+    def json(self):
+        return json.dumps({
+            'id': self.id,
+            'name': self.name
+        })
+
+    @classmethod
+    def from_json(self, data):
+        return self(**data)

@@ -3,30 +3,17 @@ from flask import Blueprint, jsonify
 from werkzeug.exceptions import NotFound
 
 from .authorization import authorize
-from .sqlite import query_db
+from .models import Organization
 
 bp = Blueprint("organization", __name__, url_prefix="/organizations")
 
 
-@dataclass
-class Organization:
-    """Organization model"""
-
-    name: str
-    id: int = None
-
-    @classmethod
-    def lookup(cls, id: int):
-        """Lookup an organization from the DB by id"""
-        record = query_db(
-            "select id, name from organizations where id  = ?", [id], one=True,
-        )
-        if record is None:
-            raise NotFound()
-        return cls(**record)
-
-
 @bp.route("/<int:id>", methods=["GET"])
 def get_organization(id):
-    organization = Organization.lookup(id)
-    return str(authorize("read", organization))
+    organization = Organization.query.get(id)
+    if organization is None:
+        raise NotFound()
+
+    authorize("read", organization)
+
+    return organization.json()
