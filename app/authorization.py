@@ -33,10 +33,9 @@ def init_oso(app):
     oso.register_class(Actor)
     oso.register_class(Guest)
     oso.register_class(User)
-    oso.register_class(Expense)
     oso.register_class(Organization)
 
-    oso.register_class(models.Expense, name="SAExpense")
+    oso.register_class(models.Expense)
 
     for policy in app.config.get("OSO_POLICIES", []):
         oso.load_file(policy)

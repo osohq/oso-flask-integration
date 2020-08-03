@@ -21,13 +21,7 @@ allow_by_path(_user, "PUT", "expenses", ["submit"]);
 allow(user: User, "read", expense: Expense) if
     submitted(user, expense);
 
-allow(user: User, "read", expense: SAExpense) if
-    submitted(user, expense);
-
 submitted(user: User, expense: Expense) if
-    user.id = expense.user_id;
-
-submitted(user: User, expense: SAExpense) if
     user.id = expense.user_id;
 
 ### Organization rules
