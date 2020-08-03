@@ -10,8 +10,6 @@ from oso import Oso
 
 from .sa import db
 from . import authorization, expense, organization, user
-from . import sqlite
-
 
 app = Flask(__name__)
 oso = Oso()
@@ -23,15 +21,12 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         SQLALCHEMY_DATABASE_URI='sqlite:///../expenses.db',
-        DATABASE="expenses.db",
         OSO_POLICIES=["app/authorization.polar"]
     )
 
     db.init_app(app)
 
-    # register DB handlers
-    app.register_blueprint(sqlite.bp)
-    # regiester user handlers
+    # register user handlers
     app.register_blueprint(user.bp)
     # register expenses routes
     app.register_blueprint(expense.bp)

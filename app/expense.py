@@ -4,7 +4,6 @@ from flask import Blueprint, g, jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from .authorization import authorize
-from .sqlite import query_db
 from .sa import db
 from .user import User
 from . import models
