@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from flask import current_app, g, request, Blueprint
 from werkzeug.exceptions import Unauthorized
 
-from .db import query_db
+from .sqlite import query_db
 
 bp = Blueprint("user", __name__)
 

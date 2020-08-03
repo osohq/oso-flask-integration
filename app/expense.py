@@ -4,8 +4,9 @@ from flask import Blueprint, g, jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from .authorization import authorize
-from .db import query_db
+from .sqlite import query_db
 from .user import User
+from . import models
 
 bp = Blueprint("expense", __name__, url_prefix="/expenses")
 
@@ -13,7 +14,6 @@ bp = Blueprint("expense", __name__, url_prefix="/expenses")
 @dataclass
 class Expense:
     """Expense model"""
-
     amount: int
     description: str
     user_id: int
@@ -48,7 +48,10 @@ class Expense:
 
 @bp.route("/<int:id>", methods=["GET"])
 def get_expense(id):
-    expense = Expense.lookup(id)
+    expense = models.Expense.query.get(id)
+    if expense is None:
+        raise NotFound()
+
     return str(authorize("read", expense))
 
 

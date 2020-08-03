@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify
 from werkzeug.exceptions import NotFound
 
 from .authorization import authorize
-from .db import query_db
+from .sqlite import query_db
 
 bp = Blueprint("organization", __name__, url_prefix="/organizations")
 

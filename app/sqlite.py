@@ -4,7 +4,7 @@ import os
 import sqlite3
 
 
-bp = Blueprint("db", __name__)
+bp = Blueprint("sqlite", __name__)
 
 
 @bp.before_app_request
