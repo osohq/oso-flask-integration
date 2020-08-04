@@ -1,7 +1,9 @@
 import datetime
 import json
 
-from .sa import db
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 def now():
     return datetime.datetime.now()
@@ -13,7 +15,7 @@ class Expense(db.Model):
     amount = db.Column(db.Integer)
 
     # TODO (dhatch): Forign key & relationship.
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     description = db.Column(db.Text)
 
     created_at = db.Column(db.DateTime, default=now)
@@ -55,8 +57,8 @@ class User(db.Model):
     title = db.Column(db.String(256))
 
     location_id = db.Column(db.Integer)
-    organization_id = db.Column(db.Integer)
-    manager_id = db.Column(db.Integer)
+    organization_id = db.Column(db.Integer, db.ForeignKey('organiations.id'))
+    manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     def json(self):
         return json.dumps({

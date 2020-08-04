@@ -8,8 +8,8 @@ from flask_sqlalchemy import SQLAlchemy
 
 from oso import Oso
 
-from .sa import db
 from . import authorization, expense, organization, user
+from .models import db
 
 app = Flask(__name__)
 oso = Oso()
