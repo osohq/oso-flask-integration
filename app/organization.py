@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from flask import Blueprint, jsonify
 from werkzeug.exceptions import NotFound
 
-from .authorization import authorize
+from .authorization import oso
 from .models import Organization
 
 bp = Blueprint("organization", __name__, url_prefix="/organizations")
@@ -14,6 +14,6 @@ def get_organization(id):
     if organization is None:
         raise NotFound()
 
-    authorize("read", organization)
+    oso.authorize(action="read", resource=organization)
 
     return organization.json()

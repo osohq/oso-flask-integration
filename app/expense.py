@@ -3,7 +3,9 @@ from datetime import datetime
 from flask import Blueprint, g, jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
 
-from .authorization import authorize
+from oso_flask import skip_authorization
+
+from .authorization import oso
 from .models import db, Expense
 from .user import User
 from . import models
@@ -17,11 +19,12 @@ def get_expense(id):
     if expense is None:
         raise NotFound()
 
-    authorize("read", expense)
+    oso.authorize(action="read", resource=expense)
     return expense.json()
 
 
 @bp.route("/submit", methods=["PUT"])
+@skip_authorization
 def submit_expense():
     expense_data = request.get_json(force=True)
     if not expense_data:

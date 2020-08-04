@@ -3,6 +3,7 @@ from flask import current_app, g, request, Blueprint
 from werkzeug.exceptions import Unauthorized
 
 from .models import Organization, User
+from oso_flask import skip_authorization, authorize
 
 bp = Blueprint("user", __name__)
 
@@ -33,6 +34,7 @@ def set_current_user():
 
 
 @bp.route("/whoami")
+@authorize(resource=request)
 def whoami():
     you = g.current_user
     if isinstance(you, User):
