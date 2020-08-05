@@ -7,11 +7,11 @@ from werkzeug.exceptions import Forbidden
 import oso
 from oso import OsoException
 
-class Oso(oso.Oso):
+class FlaskOso:
     """Flask specific functionality for oso."""
-    def __init__(self, app=None, *args, **kwargs):
-        # TODO (dhatch): Figure out how to get oso (if this isn't oso subclass)
+    def __init__(self, oso=None, app=None):
         self._app = app
+        self._oso = None
 
         # TODO (dhatch): A few defaults for this dependending on what
         # other frameworks are in use.
@@ -20,12 +20,19 @@ class Oso(oso.Oso):
         if self._app is not None:
             self.init_app(self._app)
 
-        super().__init__(*args, **kwargs)
-        self.register_class(Request)
+        if oso is not None:
+            self.set_oso(oso)
 
         # TODO config parameters
 
     ## Initialization
+
+    def set_oso(self, oso):
+        if oso == self._oso:
+            return
+
+        self._oso = oso
+        self._oso.register_class(Request)
 
     def init_app(self, app):
         app.teardown_appcontext(self.teardown)
@@ -74,7 +81,7 @@ class Oso(oso.Oso):
         if resource == request:
             resource = request._get_current_object()
 
-        allowed = self.is_allowed(actor, action, resource)
+        allowed = self.oso.is_allowed(actor, action, resource)
         _authorize_called()
 
         if not allowed:
@@ -83,6 +90,10 @@ class Oso(oso.Oso):
     @property
     def app(self):
         return self._app or current_app
+
+    @property
+    def oso(self):
+        return self._oso
 
     @property
     def current_actor(self):
@@ -140,59 +151,6 @@ def skip_authorization(func=None, /, reason=None):
 
     return functools.partial(skip_authorization, reason=reason)
 
-
-# TODO (dhatch): First attempt here, change this up...
-def authorize_route(self, func=None, /, *, actor=None, action=None, resource=None):
-    """Flask authorize route decorator."""
-    def decorate(f):
-        partial_kwargs = {}
-        if actor is not None:
-            partial_kwargs['actor'] = actor
-
-        if action is not None:
-            partial_kwargs['action'] = action
-
-        if resource is not None:
-            partial_kwargs['resource'] = resource
-
-        @functools.wraps(f)
-        def call(*args, **kwargs):
-            oso = _app_ctx_stack.top.oso_flask_oso
-            # TODO (dhatch): Customize current user
-            if 'actor' not in partial_kwargs:
-                partial_kwargs['actor'] = g.current_user
-
-            if {'actor', 'action', 'resource'} - set(partial_kwargs.keys()) == set():
-                # If full set of arguments are provided, just call it and continue.
-                oso.is_allowed(**partial_kwargs)
-                return f(*args, **kwargs)
-
-            # Otherwise, pass a partial to be evaluated in the route body.
-            partial = functools.partial(authorize, **partial_kwargs)
-            result = f(*args, **kwargs, authorize=partial)
-
-            if not is_allowed_called:
-                raise OsoException("Forgot to call authorize in protected function!")
-
-            return result
-
-        return call
-
-    if func is not None:
-        assert actor is None
-        assert action is None
-        assert resource is None
-
-        return decorate(func)
-
-    return decorate
-
 def _authorize_called():
     """Mark current request as authorized."""
     _app_ctx_stack.top.oso_flask_authorize_called = True
-
-class OsoSQLAlchemy:
-    """SQLAlchemy oso integration"""
-    def __init__(self, oso):
-        self.oso = oso
-
