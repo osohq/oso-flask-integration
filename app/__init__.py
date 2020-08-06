@@ -1,12 +1,15 @@
 """Entrypoint to the expenses application"""
 
+import os
+
 import flask
 from flask import g, Flask
-import os
+from flask_sqlalchemy import SQLAlchemy
+
 from oso import Oso
 
-from . import authorization, db, expense, organization, user
-
+from . import authorization, expense, organization, user
+from .models import db
 
 app = Flask(__name__)
 oso = Oso()
@@ -15,13 +18,15 @@ oso = Oso()
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
+
     app.config.from_mapping(
-        DATABASE="expenses.db", OSO_POLICIES=["app/authorization.polar"]
+        SQLALCHEMY_DATABASE_URI='sqlite:///../expenses.db',
+        OSO_POLICIES=["app/authorization.polar"]
     )
 
-    # register DB handlers
-    app.register_blueprint(db.bp)
-    # regiester user handlers
+    db.init_app(app)
+
+    # register user handlers
     app.register_blueprint(user.bp)
     # register expenses routes
     app.register_blueprint(expense.bp)

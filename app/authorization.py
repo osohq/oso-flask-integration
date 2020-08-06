@@ -4,38 +4,31 @@ from oso import Oso, OsoException
 from oso.extras import Http
 from werkzeug.exceptions import BadRequest, Forbidden
 
+from oso_flask import FlaskOso
+
 bp = Blueprint("authorization", __name__)
 
-
-@bp.before_app_request
-def authorize_request():
-    """Authorize the incoming request"""
-    http = Http(path=request.path)
-    if not current_app.oso.is_allowed(g.current_user, request.method, http):
-        return Forbidden("Not Authorized!")
-
-
-def authorize(action, resource):
-    """Authorize whether the current user can perform `action` on `resource`"""
-    if current_app.oso.is_allowed(g.current_user, action, resource):
-        return resource
-    else:
-        raise Forbidden("Not Authorized!")
-
+base_oso = Oso()
+oso = FlaskOso(base_oso)
 
 def init_oso(app):
-    from .expense import Expense
-    from .organization import Organization
     from .user import Actor, Guest, User
+    from . import models
 
-    oso = Oso()
-    oso.register_class(Actor)
-    oso.register_class(Guest)
-    oso.register_class(User)
-    oso.register_class(Expense)
-    oso.register_class(Organization)
+    base_oso.register_class(Actor)
+    base_oso.register_class(Guest)
+    base_oso.register_class(User)
+
+    base_oso.register_class(models.Organization)
+    base_oso.register_class(models.Expense)
+
+    oso.init_app(app)
+    oso.require_authorization(app)
+    oso.perform_route_authorization(app)
 
     for policy in app.config.get("OSO_POLICIES", []):
-        oso.load_file(policy)
+        base_oso.load_file(policy)
 
     app.oso = oso
+
+    return oso
