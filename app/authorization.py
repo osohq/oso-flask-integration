@@ -4,7 +4,7 @@ from oso import Oso, OsoException
 from oso.extras import Http
 from werkzeug.exceptions import BadRequest, Forbidden
 
-from oso_flask import FlaskOso
+from flask_oso import FlaskOso
 
 bp = Blueprint("authorization", __name__)
 

@@ -3,7 +3,7 @@ from flask import current_app, g, request, Blueprint
 from werkzeug.exceptions import Unauthorized
 
 from .models import Organization, User
-from oso_flask import skip_authorization, authorize
+from flask_oso import skip_authorization, authorize
 
 bp = Blueprint("user", __name__)
 

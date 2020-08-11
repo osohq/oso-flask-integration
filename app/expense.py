@@ -3,7 +3,7 @@ from datetime import datetime
 from flask import Blueprint, g, jsonify, request
 from werkzeug.exceptions import BadRequest, NotFound
 
-from oso_flask import skip_authorization
+from flask_oso import skip_authorization
 
 from .authorization import oso
 from .models import db, Expense
