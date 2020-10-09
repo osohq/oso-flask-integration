@@ -2,6 +2,7 @@ import datetime
 import json
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
@@ -16,6 +17,8 @@ class Expense(db.Model):
 
     # TODO (dhatch): Forign key & relationship.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = relationship("User")
+
     description = db.Column(db.Text)
 
     created_at = db.Column(db.DateTime, default=now)

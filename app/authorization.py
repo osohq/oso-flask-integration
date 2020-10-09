@@ -23,8 +23,7 @@ def init_oso(app):
     base_oso.register_class(models.Expense)
 
     oso.init_app(app)
-    oso.require_authorization(app)
-    oso.perform_route_authorization(app)
+    # oso.require_authorization(app)
 
     for policy in app.config.get("OSO_POLICIES", []):
         base_oso.load_file(policy)
