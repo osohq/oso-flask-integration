@@ -29,7 +29,7 @@ class Expense(db.Model):
             'description': self.description
         })
 
-   @classmethod
+    @classmethod
     def from_json(self, data):
         return self(**data)
 

@@ -11,6 +11,10 @@ class Expense(SQLAlchemyObjectType):
         model = models.Expense
         interfaces = (relay.Node,)
 
+class ExpenseInput(graphene.InputObjectType):
+    amount = graphene.Int(required=True)
+    description = graphene.String(required=True)
+
 class Organization(SQLAlchemyObjectType):
     class Meta:
         model = models.Organization
@@ -30,4 +34,25 @@ class Query(graphene.ObjectType):
         return g.current_user if isinstance(g.current_user, models.User) else None
 
 
-schema = graphene.Schema(query=Query)
+class CreateExpense(graphene.Mutation):
+    class Arguments:
+        expense_data = ExpenseInput(required=True)
+
+    expense = graphene.Field(Expense)
+
+    def mutate(root, info, expense_data=None):
+        expense = models.Expense(
+            description=expense_data.description,
+            amount=expense_data.amount,
+            user_id=g.current_user.id
+        )
+
+        models.db.session.add(expense)
+        models.db.session.commit()
+
+        return CreateExpense(expense=expense)
+
+class Mutation(graphene.ObjectType):
+    create_expense = CreateExpense.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
