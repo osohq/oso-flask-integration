@@ -29,6 +29,7 @@ class Query(graphene.ObjectType):
     expenses = SQLAlchemyConnectionField(Expense.connection)
     organizations = SQLAlchemyConnectionField(Organization.connection)
     user = graphene.Field(User)
+    node = graphene.relay.Node.Field()
 
     def resolve_user(parent, into):
         return g.current_user if isinstance(g.current_user, models.User) else None
