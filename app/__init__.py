@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from oso import Oso
 
-from . import authorization, expense, organization, user
+from . import authorization, expense, organization, user, graphql
 from .models import db
 
 app = Flask(__name__)
@@ -34,6 +34,7 @@ def create_app(test_config=None):
     app.register_blueprint(organization.bp)
     # register authorization handlers
     app.register_blueprint(authorization.bp)
+    app.register_blueprint(graphql.bp)
     authorization.init_oso(app)
 
     #### Simple test route

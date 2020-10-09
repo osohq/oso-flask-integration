@@ -1,5 +1,8 @@
 # Top-level rules
 
+allow(_user, _, _: Request{path: path}) if
+    path = "/graphql";
+
 allow(_user, "GET", http_request: Request) if
     http_request.path = "/";
 
