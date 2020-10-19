@@ -57,3 +57,16 @@ class Mutation(graphene.ObjectType):
     create_expense = CreateExpense.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
+
+
+
+def oso_register_schema(schema):
+    """Register schema types with oso."""
+    from .authorization import base_oso
+    for name, type_ in schema.get_type_map().items():
+        try:
+            base_oso.register_class(type_.graphene_type, name=f"schema::{name}")
+        except AttributeError:
+            continue
+
+oso_register_schema(schema)

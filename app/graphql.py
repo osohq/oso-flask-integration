@@ -32,8 +32,33 @@ def authorize_graphql_value(value):
 
     return value
 
+def field_authorized(parent, info):
+    graphene_type = getattr(info.parent_type, "graphene_type", None)
+    if graphene_type is None:
+        return True
+
+    should_auth = one_result(current_app.oso.oso.query_rule("graphql_authorize_schema",
+                                                            graphene_type))
+    if not should_auth:
+        print(f"field  should not auth type {graphene_type}")
+        return True
+
+    field_allowed = one_result(
+        current_app.oso.oso.query_rule("allow_field", current_app.oso.current_actor,
+                                       "query",
+                                       graphene_type,
+                                       parent,
+                                       info.field_name))
+
+    return field_allowed
+
+class UnauthException(Exception): pass
+
 class AuthorizationMiddleware(object):
     def resolve(self, next, root, info, **args):
+        if not field_authorized(root, info):
+            raise UnauthException(f"Field {info.field_name} not authorized on {info.parent_type.name}")
+
         field_value = next(root, info, **args)
 
         if isinstance(field_value, Promise):
