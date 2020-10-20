@@ -31,7 +31,7 @@ class Query(graphene.ObjectType):
     user = graphene.Field(User)
     node = graphene.relay.Node.Field()
 
-    def resolve_user(parent, into):
+    def resolve_user(parent, info):
         return g.current_user if isinstance(g.current_user, models.User) else None
 
 
