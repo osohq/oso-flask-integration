@@ -1,20 +1,17 @@
-from dataclasses import dataclass
-from flask import current_app, g, request, Blueprint
-from oso import Oso, OsoException
-from oso.extras import Http
-from werkzeug.exceptions import BadRequest, Forbidden
+from flask import  Blueprint
+from oso import Oso
 
 from flask_oso import FlaskOso
 
 bp = Blueprint("authorization", __name__)
 
-base_oso = Oso()
-oso = FlaskOso(base_oso)
 
 def init_oso(app):
     from .user import Actor, Guest, User
     from . import models
 
+    base_oso = Oso()
+    oso = FlaskOso(base_oso)
     base_oso.register_class(Actor)
     base_oso.register_class(Guest)
     base_oso.register_class(User)
@@ -31,4 +28,3 @@ def init_oso(app):
 
     app.oso = oso
 
-    return oso

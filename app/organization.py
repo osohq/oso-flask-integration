@@ -1,12 +1,9 @@
-from dataclasses import dataclass
-from flask import Blueprint, jsonify
+from flask import Blueprint, current_app, jsonify
 from werkzeug.exceptions import NotFound
 
-from .authorization import oso
 from .models import Organization
 
 bp = Blueprint("organization", __name__, url_prefix="/organizations")
-
 
 @bp.route("/<int:id>", methods=["GET"])
 def get_organization(id):
@@ -14,6 +11,6 @@ def get_organization(id):
     if organization is None:
         raise NotFound()
 
-    oso.authorize(action="read", resource=organization)
+    current_app.oso.authorize(action="read", resource=organization)
 
-    return organization.json()
+    return jsonify(organization.as_dict())

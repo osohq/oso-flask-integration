@@ -1,0 +1,43 @@
+name: Runs tests against main on osohq/oso
+on:
+  push:
+  schedule:
+    - cron:  '0 0 * * 1-5' # run at midnight UTC every weekday
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest] # TODO: add back in other OS's
+        python-version: [3.6] # can add other python versions here
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: actions/checkout@v2 # checkout demo repo
+        with:
+          path: oso-flask-integration
+      - uses: actions/checkout@v2 # checkout oso repo
+        with:
+          repository: 'osohq/oso'
+          path: oso
+      - run: cargo build
+        working-directory: oso
+      - run: make package
+        working-directory: oso/languages/python/oso
+      - run: pip install -r requirements.txt
+        working-directory: oso-flask-integration
+      - run: sqlite3 expenses.db ".read expenses.sql"
+        working-directory: oso-flask-integration
+      - run: pytest
+        working-directory: oso-flask-integration
+#       - uses: rtCamp/action-slack-notify@master
+#         if: failure() && github.ref == 'refs/heads/main'
+#         env:
+#           SLACK_CHANNEL: firehose
+#           SLACK_COLOR: 'danger'
+#           SLACK_MESSAGE: "${{ github.event.head_commit.url }}"
+#           SLACK_TITLE: 'Flask integration CI tests failed.'
+#           SLACK_USERNAME: github-actions
+#           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_TO_FIREHOSE }}

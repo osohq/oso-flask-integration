@@ -6,13 +6,10 @@ import flask
 from flask import g, Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from oso import Oso
-
 from . import authorization, expense, organization, user
 from .models import db
 
 app = Flask(__name__)
-oso = Oso()
 
 
 def create_app(test_config=None):

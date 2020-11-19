@@ -1,5 +1,4 @@
 import datetime
-import json
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -21,13 +20,13 @@ class Expense(db.Model):
     created_at = db.Column(db.DateTime, default=now)
     updated_at = db.Column(db.DateTime, default=now)
 
-    def json(self):
-        return json.dumps({
+    def as_dict(self):
+        return {
             'id': self.id,
             'amount': self.amount,
             'user_id': self.user_id,
             'description': self.description
-        })
+        }
 
     @classmethod
     def from_json(self, data):
@@ -39,11 +38,11 @@ class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128))
 
-    def json(self):
-        return json.dumps({
+    def as_dict(self):
+        return {
             'id': self.id,
             'name': self.name
-        })
+        }
 
     @classmethod
     def from_json(self, data):
@@ -60,15 +59,18 @@ class User(db.Model):
     organization_id = db.Column(db.Integer, db.ForeignKey('organiations.id'))
     manager_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    def json(self):
-        return json.dumps({
+    def __str__(self):
+        return "User"
+
+    def as_dict(self):
+        return {
             'id': self.id,
             'email': self.email,
             'title': self.title,
             'location_id': self.location_id,
             'organization_id': self.organization_id,
             'manager_id': self.manager_id
-        })
+        }
 
     @classmethod
     def from_json(self, data):

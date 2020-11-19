@@ -1,14 +1,9 @@
-from dataclasses import dataclass
-from datetime import datetime
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, request, current_app, jsonify
 from werkzeug.exceptions import BadRequest, NotFound
 
 from flask_oso import skip_authorization
 
-from .authorization import oso
 from .models import db, Expense
-from .user import User
-from . import models
 
 bp = Blueprint("expense", __name__, url_prefix="/expenses")
 
@@ -19,8 +14,8 @@ def get_expense(id):
     if expense is None:
         raise NotFound()
 
-    oso.authorize(action="read", resource=expense)
-    return expense.json()
+    current_app.oso.authorize(action="read", resource=expense)
+    return jsonify(expense.as_dict())
 
 
 @bp.route("/submit", methods=["PUT"])
@@ -37,4 +32,4 @@ def submit_expense():
     db.session.add(expense)
     db.session.commit()
 
-    return expense.json()
+    return jsonify(expense.as_dict())
