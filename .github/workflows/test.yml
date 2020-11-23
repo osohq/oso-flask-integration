@@ -1,8 +1,5 @@
-name: Runs tests against main on osohq/oso
-on:
-  push:
-  schedule:
-    - cron:  '0 0 * * 1-5' # run at midnight UTC every weekday
+name: Runs tests against built branches on osohq/oso
+on: repository_dispatch
 
 jobs:
   test:
@@ -20,8 +17,9 @@ jobs:
           path: oso-flask-integration
       - uses: actions/checkout@v2 # checkout oso repo
         with:
-          repository: 'osohq/oso'
+          repository: "osohq/oso"
           path: oso
+          ref: ${{ github.event.client_payload.commit }}
       - run: cargo build
         working-directory: oso
       - run: make package
