@@ -1,8 +1,7 @@
-name: Runs tests against main on osohq/oso
+name: Runs tests against built branches on osohq/oso
 on:
-  push:
-  schedule:
-    - cron: "0 0 * * 1-5" # run at midnight UTC every weekday
+  repository_dispatch:
+    types: [oso_release]
 
 jobs:
   test:
@@ -22,6 +21,7 @@ jobs:
         with:
           repository: "osohq/oso"
           path: oso
+          ref: ${{ github.event.client_payload.commit }}
       - run: cargo build
         working-directory: oso
       - run: make package
