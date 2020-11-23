@@ -1,5 +1,7 @@
 name: Runs tests against built branches on osohq/oso
-on: repository_dispatch
+on:
+  repository_dispatch:
+    types: [oso_release]
 
 jobs:
   test:
