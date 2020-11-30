@@ -1,10 +1,21 @@
 import datetime
 import json
 
+from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, scoped_session
 
-db = SQLAlchemy()
+from sqlalchemy_oso.hooks import authorized_sessionmaker, make_authorized_query_cls
+
+# TODO hacked up
+AuthorizedQuery = make_authorized_query_cls(
+    get_oso=lambda: current_app.oso.oso,
+    get_user=lambda: current_app.oso.current_actor,
+    # TODO non read action.
+    get_action=lambda: "read")
+
+db = SQLAlchemy(query_class=AuthorizedQuery,
+                session_options={'enable_baked_queries': True})
 
 def now():
     return datetime.datetime.now()

@@ -3,11 +3,14 @@ from flask_graphql import GraphQLView
 from flask import current_app
 from promise import Promise
 
+from sqlalchemy_oso.hooks import authorized_sessionmaker
+
 from werkzeug.exceptions import Forbidden
 
 from .authorization import oso
 
 from .schema import schema
+from .models import db
 
 bp = Blueprint("graphql", __name__)
 
@@ -59,17 +62,31 @@ class AuthorizationMiddleware(object):
         if not field_authorized(root, info):
             raise UnauthException(f"Field {info.field_name} not authorized on {info.parent_type.name}")
 
+        print(f"resolve: field_name = {info.field_name}, parent = {root}, rt type = {info.return_type}")
         field_value = next(root, info, **args)
 
         if isinstance(field_value, Promise):
             field_value = field_value.then(authorize_graphql_value)
         else:
-            authorize_graphql_value(value)
+            field_value = authorize_graphql_value(value)
 
         return field_value
 
-bp.add_url_rule('/graphql', view_func=GraphQLView.as_view(
+class SQLAlchemyAuthorizedGraphQLView(GraphQLView):
+    sessionmaker = authorized_sessionmaker(
+        get_oso=lambda: current_app.oso.oso,
+        get_user=lambda: current_app.oso.current_actor,
+        # TODO non read action.
+        get_action=lambda: "read")
+
+    def get_context(self):
+        return {
+            'session': self.sessionmaker(bind=db.engine)
+        }
+
+
+bp.add_url_rule('/graphql', view_func=SQLAlchemyAuthorizedGraphQLView.as_view(
     'graphql',
     schema=schema,
-    middleware=[AuthorizationMiddleware()],
+    middleware=[],
     graphiql=True))

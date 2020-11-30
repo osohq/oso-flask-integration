@@ -15,6 +15,12 @@ app = Flask(__name__)
 oso = Oso()
 
 
+def log_queries():
+    import logging
+
+    logging.basicConfig()
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.INFO)
+
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
@@ -41,6 +47,8 @@ def create_app(test_config=None):
     @app.route("/")
     def hello():
         return f"hello {g.current_user}"
+
+    log_queries()
 
     return app
 

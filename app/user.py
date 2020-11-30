@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from flask import current_app, g, request, Blueprint
 from werkzeug.exceptions import Unauthorized
 
-from .models import Organization, User
+from sqlalchemy.orm import Session
+
+from .models import Organization, User, db
 from flask_oso import skip_authorization, authorize
 
 bp = Blueprint("user", __name__)
@@ -25,7 +27,10 @@ def set_current_user():
         email = request.headers.get("user")
         if email:
             try:
-                g.current_user = User.query.filter(User.email==email).first()
+                # TODO hack to query through a separate session that isn't
+                # authorized.
+                session = Session(bind=db.engine)
+                g.current_user = session.query(User).filter(User.email==email).first()
             except Exception as e:
                 current_app.logger.exception(e)
                 return Unauthorized("user not found")
