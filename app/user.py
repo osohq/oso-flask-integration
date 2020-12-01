@@ -27,8 +27,7 @@ def set_current_user():
         email = request.headers.get("user")
         if email:
             try:
-                # TODO hack to query through a separate session that isn't
-                # authorized.
+                # Use non authenticated session to get the current user.
                 session = Session(bind=db.engine)
                 g.current_user = session.query(User).filter(User.email==email).first()
             except Exception as e:

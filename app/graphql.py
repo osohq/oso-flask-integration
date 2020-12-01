@@ -72,20 +72,7 @@ class AuthorizationMiddleware(object):
 
         return field_value
 
-class SQLAlchemyAuthorizedGraphQLView(GraphQLView):
-    sessionmaker = authorized_sessionmaker(
-        get_oso=lambda: current_app.oso.oso,
-        get_user=lambda: current_app.oso.current_actor,
-        # TODO non read action.
-        get_action=lambda: "read")
-
-    def get_context(self):
-        return {
-            'session': self.sessionmaker(bind=db.engine)
-        }
-
-
-bp.add_url_rule('/graphql', view_func=SQLAlchemyAuthorizedGraphQLView.as_view(
+bp.add_url_rule('/graphql', view_func=GraphQLView.as_view(
     'graphql',
     schema=schema,
     middleware=[],

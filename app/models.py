@@ -7,15 +7,15 @@ from sqlalchemy.orm import relationship, scoped_session
 
 from sqlalchemy_oso.hooks import authorized_sessionmaker, make_authorized_query_cls
 
-# TODO hacked up
+# TODO hacked up. Need to modify to make this work with authorization context
+# in session.
 AuthorizedQuery = make_authorized_query_cls(
     get_oso=lambda: current_app.oso.oso,
     get_user=lambda: current_app.oso.current_actor,
     # TODO non read action.
     get_action=lambda: "read")
 
-db = SQLAlchemy(query_class=AuthorizedQuery,
-                session_options={'enable_baked_queries': True})
+db = SQLAlchemy(query_class=AuthorizedQuery)
 
 def now():
     return datetime.datetime.now()
