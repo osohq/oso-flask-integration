@@ -7,8 +7,8 @@ allow(_user: User, "GET", http_request: Request) if
     http_request.path = "/whoami";
 
 # Allow by path segment
-allow(user, action, http_request: Request) if
-    http_request.path.split("/") = [_, stem, *rest]
+allow(user: User, action, http_request: Request) if
+    [_, stem, *rest] = http_request.path.split("/")
     and allow_by_path(user, action, stem, rest);
 
 ### Expense rules
